@@ -13,6 +13,15 @@ import Vibrant from 'node-vibrant';
 export class ColorService {
   constructor() {}
 
+  /**
+   *
+   * @param file - multer file type
+   * @returns an object with the hex code of 4 prominent colors within the photo
+   *
+   * Issues:
+   * Need to filter for only .img, .png, etc
+   *
+   */
   async extractColorFileUpload(@UploadedFile() file: Express.Multer.File) {
     try {
       if (!file) {
