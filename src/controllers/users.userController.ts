@@ -7,6 +7,7 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
+import { UserDto } from 'src/dto/user.userDto';
 import { User } from 'src/models/user.userModel';
 import { UserService } from 'src/services/users.userService';
 
@@ -41,7 +42,7 @@ export class UserController {
    *
    */
   @Post()
-  async createNewUser(@Body() user: userDto): Promise<User> {
+  async createNewUser(@Body() user: UserDto): Promise<User> {
     try {
       return this.userService.createUser(user);
     } catch (err) {
@@ -58,6 +59,9 @@ export class UserController {
    * @returns Promise resolves in a User with the updated palette array, containing new object
    *
    */
-  @Post('palette')
-  async postPalletteToUser(colorObject: any): Promise<User> {}
+  @Post('palette/post/:username')
+  async postPalletteToUser(
+    @Param('username') username: string,
+    colorObject: any,
+  ): Promise<User> {}
 }
