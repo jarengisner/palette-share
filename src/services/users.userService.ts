@@ -51,7 +51,7 @@ export class UserService {
    * @returns Promise resolving in a User object
    *
    */
-  async finOneByUsername(username: string): Promise<User> {
+  async findOneByUsername(username: string): Promise<User> {
     try {
       return await this.userModel.findOne({ username: username }).exec();
     } catch (err) {

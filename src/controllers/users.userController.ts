@@ -16,7 +16,16 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getAllUsers(): Promise<User[]> {}
+  async getAllUsers(): Promise<User[]> {
+    try {
+      return await this.userService.findAll();
+    } catch (err) {
+      throw new HttpException(
+        `Error in find all users controller: ${err.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   /**
    * @param username - string username of user
@@ -24,7 +33,26 @@ export class UserController {
    *
    */
   @Get(':username')
-  async findOneUserByUsername(@Param('username') username: string) {}
+  async findOneUserByUsername(@Param('username') username: string) {
+    try {
+      const locatedUser: User =
+        await this.userService.findOneByUsername(username);
+
+      if (locatedUser) {
+        return locatedUser;
+      } else {
+        throw new HttpException(
+          'No users found with that username',
+          HttpStatus.NO_CONTENT,
+        );
+      }
+    } catch (err) {
+      throw new HttpException(
+        `Error in finding user by username controller: ${err.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   /**
    * @param username - username of the user
@@ -33,7 +61,19 @@ export class UserController {
   @Get(':username/palette')
   async getUserPalleteByUsername(
     @Param('username') username: string,
-  ): Promise<any[]> {}
+  ): Promise<any[]> {
+    try {
+      const searchUser: User =
+        await this.userService.findOneByUsername(username);
+
+      return searchUser.palette;
+    } catch (err) {
+      throw new HttpException(
+        `Error fetching pallete from user in controller: ${err.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   /**
    *
@@ -63,5 +103,14 @@ export class UserController {
   async postPalletteToUser(
     @Param('username') username: string,
     colorObject: any,
-  ): Promise<User> {}
+  ): Promise<User> {
+    try {
+      return await this.userService.postPalette(username, colorObject);
+    } catch (err) {
+      throw new HttpException(
+        `Error in posting pallete in controller: ${err.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
