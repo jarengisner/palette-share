@@ -33,7 +33,12 @@ export class ColorService {
 
       const path = file.path;
 
-      const palette = await Vibrant.from(path).getPalette();
+      const palette = await Vibrant.from(path)
+        .getPalette()
+        .catch((err) => {
+          console.log(err);
+          throw new Error('Vibrant failed to process image');
+        });
 
       const dominantColors = Object.values(palette)
         .filter((color) => color !== null)
@@ -43,6 +48,7 @@ export class ColorService {
 
       return { dominantColors };
     } catch (err) {
+      console.log('Error occurred in service');
       throw new HttpException(
         `Error within file upload: ${err.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
