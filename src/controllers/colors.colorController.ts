@@ -5,34 +5,79 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
-  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express, Request } from 'express';
+import { Express } from 'express';
 import { ColorService } from 'src/services/colors.colorService';
 
 @Controller('colors')
 export class ColorController {
   constructor(private readonly colorService: ColorService) {}
 
+  /**
+   * Uploads photo to processing. When this happens, it should return the colors, however the bug is residing in the service layer
+   *
+   * @param photo - file form data leading to image file
+   * @returns promise of any, going to be mapped to a file that allows us to access the colors directly
+   *
+   * Need to fix bug in the service, controller layer is receiving the file correctly, yet service is not it seems..
+   */
   @Post()
   @UseInterceptors(FileInterceptor('photo'))
-  async processPhoto(
-    @UploadedFile() photo: Express.Multer.File,
-    @Req() req: Request,
-  ): Promise<any> {
+  async processPhoto(@UploadedFile() photo: Express.Multer.File): Promise<any> {
     try {
       if (!photo || photo == undefined) {
         console.log('Error occurs first in controller, photo is undefined');
       }
 
-      //checking request body for bug
-      console.log(req.body);
-      return await this.colorService.extractColorFileUpload(photo);
+      //return await this.colorService.extractColorFileUpload(photo);
+
+      return await this.colorService.extractColorTest(photo);
+
+      /*return {
+        success: true,
+        filename: photo.originalname,
+        mimeType: photo.mimetype,
+        size: photo.size,
+      };*/
     } catch (err) {
       console.log('Error occurred in controller');
       throw new HttpException(
         `Error in controller for processing a photo: ${err.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * The file successfully passes to the next piece of the function, the error is occurring in the processing of the photo
+   *
+   */
+  @Post('test')
+  @UseInterceptors(FileInterceptor('photo'))
+  async testUpload(@UploadedFile() photo: Express.Multer.File): Promise<any> {
+    try {
+      if (!photo) {
+        console.error('No file uploaded');
+        throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
+      }
+
+      console.log('Successful upload to test endpoint:', {
+        originalName: photo.originalname,
+        mimeType: photo.mimetype,
+        size: photo.size,
+      });
+
+      return {
+        success: true,
+        filename: photo.originalname,
+        mimeType: photo.mimetype,
+        size: photo.size,
+      };
+    } catch (err) {
+      console.error('Error in test endpoint:', err.message);
+      throw new HttpException(
+        `File upload failed: ${err.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
