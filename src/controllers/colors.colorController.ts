@@ -26,24 +26,10 @@ export class ColorController {
   @UseInterceptors(FileInterceptor('photo'))
   async processPhoto(@UploadedFile() photo: Express.Multer.File): Promise<any> {
     try {
-      if (!photo || photo == undefined) {
-        console.log('Error occurs first in controller, photo is undefined');
-      }
-
-      //return await this.colorService.extractColorFileUpload(photo);
-
-      return await this.colorService.extractColorTest(photo);
-
-      /*return {
-        success: true,
-        filename: photo.originalname,
-        mimeType: photo.mimetype,
-        size: photo.size,
-      };*/
+      return await this.colorService.extractColorFileUpload(photo);
     } catch (err) {
-      console.log('Error occurred in controller');
       throw new HttpException(
-        `Error in controller for processing a photo: ${err.message}`,
+        `${err.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

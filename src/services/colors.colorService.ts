@@ -1,8 +1,8 @@
 //color picker from images
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
-import { Express } from 'express';
-import Vibrant from 'node-vibrant';
+
+import * as getColors from 'get-image-colors';
 
 @Injectable()
 export class ColorService {
@@ -26,30 +26,22 @@ export class ColorService {
         );
       }
 
-      const path = file.path;
+      console.log(file);
 
-      const palette = await Vibrant.from(path)
-        .getPalette()
-        .catch((err) => {
-          console.log(err);
-          throw new Error('Vibrant failed to process image');
-        });
+      console.log(file.buffer);
+      console.log(file.mimetype);
 
-      const dominantColors = Object.values(palette)
-        .filter((color) => color !== null)
-        .sort((a, b) => b.population - a.population)
-        .slice(0, 4)
-        .map((color) => color.hex);
+      const palette = await getColors(file.buffer, file.mimetype);
 
-      return { dominantColors };
+      return { palette: palette.map((color) => color.hex()) }; // Convert colors to hex if needed
     } catch (err) {
-      console.log('Error occurred in service');
       throw new HttpException(
         `Error within file upload: ${err.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
+
 
   async extractColorTest(photo: any): Promise<any> {
     try {
