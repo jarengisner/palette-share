@@ -9,6 +9,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
 import { ColorService } from 'src/services/colors.colorService';
+import Palette from 'src/types/Palette';
 
 @Controller('colors')
 export class ColorController {
@@ -24,14 +25,18 @@ export class ColorController {
    */
   @Post()
   @UseInterceptors(FileInterceptor('photo'))
-  async processPhoto(@UploadedFile() photo: Express.Multer.File): Promise<any> {
+  async processPhoto(@UploadedFile() photo: Express.Multer.File): Promise<Palette> {
     try {
       return await this.colorService.extractColorFileUpload(photo);
     } catch (err) {
-      throw new HttpException(
-        `${err.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      if (err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          `${err.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
